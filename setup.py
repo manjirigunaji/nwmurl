@@ -33,7 +33,7 @@ Then, you can use it in your Python code:
 """
 
 # Other information
-VERSION = "0.1.6"
+VERSION = "0.1.7"
 DESCRIPTION = "URL generator tool for National Water Model data"
 
 setup(
