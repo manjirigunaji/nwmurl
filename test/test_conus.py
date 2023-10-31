@@ -1,6 +1,7 @@
 import os
 import pytest
-from urlgennwm import generate_urls
+from urlgennwm import generate_urls_operational
+
 
 @pytest.fixture
 def generated_urls():
@@ -13,20 +14,33 @@ def generated_urls():
     runinput = 1
     urlbaseinput = 2
     meminput = 1
+    write_to_file = True
 
-    generate_urls(start_date, end_date, fcst_cycle, lead_time, varinput, geoinput, runinput, urlbaseinput, meminput)
+    generate_urls_operational(
+        start_date,
+        end_date,
+        fcst_cycle,
+        lead_time,
+        varinput,
+        geoinput,
+        runinput,
+        urlbaseinput,
+        meminput,
+        write_to_file,
+    )
 
     yield
+
 
 def test_generate_urls_for_conus(generated_urls):
     assert os.path.exists("filenamelist.txt")
 
     # Modify the expected URL to match the "conus" geography
     expected_urls = [
-       'https://nomads.ncep.noaa.gov/pub/data/nccf/com/nwm/post-processed/WMS/nwm.20231015/short_range/nwm.t00z.short_range.channel_rt.f001.conus.nc',
-       'https://nomads.ncep.noaa.gov/pub/data/nccf/com/nwm/post-processed/WMS/nwm.20231015/short_range/nwm.t00z.short_range.channel_rt.f018.conus.nc',
-       'https://nomads.ncep.noaa.gov/pub/data/nccf/com/nwm/post-processed/WMS/nwm.20231015/short_range/nwm.t08z.short_range.channel_rt.f001.conus.nc',
-       'https://nomads.ncep.noaa.gov/pub/data/nccf/com/nwm/post-processed/WMS/nwm.20231015/short_range/nwm.t08z.short_range.channel_rt.f018.conus.nc'
+        "https://nomads.ncep.noaa.gov/pub/data/nccf/com/nwm/post-processed/WMS/nwm.20231015/short_range/nwm.t00z.short_range.channel_rt.f001.conus.nc",
+        "https://nomads.ncep.noaa.gov/pub/data/nccf/com/nwm/post-processed/WMS/nwm.20231015/short_range/nwm.t00z.short_range.channel_rt.f018.conus.nc",
+        "https://nomads.ncep.noaa.gov/pub/data/nccf/com/nwm/post-processed/WMS/nwm.20231015/short_range/nwm.t08z.short_range.channel_rt.f001.conus.nc",
+        "https://nomads.ncep.noaa.gov/pub/data/nccf/com/nwm/post-processed/WMS/nwm.20231015/short_range/nwm.t08z.short_range.channel_rt.f018.conus.nc",
     ]
 
     with open("filenamelist.txt", "r") as file:

@@ -1,6 +1,7 @@
 import os
 import pytest
-from urlgennwm import generate_urls
+from urlgennwm import generate_urls_operational
+
 
 @pytest.fixture
 def generated_urls():
@@ -13,10 +14,23 @@ def generated_urls():
     runinput = 5  # Set to 5 for the analysis_assim folder
     urlbaseinput = 2
     meminput = 1
+    write_to_file = True
 
-    generate_urls(start_date, end_date, fcst_cycle, lead_time, varinput, geoinput, runinput, urlbaseinput, meminput)
+    generate_urls_operational(
+        start_date,
+        end_date,
+        fcst_cycle,
+        lead_time,
+        varinput,
+        geoinput,
+        runinput,
+        urlbaseinput,
+        meminput,
+        write_to_file,
+    )
 
     yield
+
 
 def test_generate_urls_for_analysis_assim(generated_urls):
     assert os.path.exists("filenamelist.txt")
