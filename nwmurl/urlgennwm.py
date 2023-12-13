@@ -1,5 +1,6 @@
 #from gevent import monkey
 #monkey.patch_all()
+from validation_util import check_valid_urls
 from dateutil import rrule
 from datetime import datetime, timezone
 from itertools import product
@@ -493,13 +494,17 @@ def generate_urls(start_date,end_date, fcst_cycle, lead_time, varinput, geoinput
             for item in file_list:
                 file.write(f"{item}\n")
 
-# start_date = "202201120000"
-# end_date   = "202201130000"
-# fcst_cycle = [0,8]
-# lead_time = [1,18]
-# varinput = 1
-# geoinput = 1
-# runinput = 1
-# urlbaseinput = 2
-# meminput = 1
-# generate_urls(start_date, end_date, fcst_cycle, lead_time, varinput, geoinput, runinput, urlbaseinput, meminput)
+start_date = "202310150000"
+end_date   = "202310150000"
+fcst_cycle = [0,8]
+lead_time = [1,18]
+varinput = 1
+geoinput = 1
+runinput = 1
+urlbaseinput = 2
+meminput = 1
+generate_urls(start_date, end_date, fcst_cycle, lead_time, varinput, geoinput, runinput, urlbaseinput, meminput)
+
+# Example usage
+file_list = create_file_list(runinput, varinput, geoinput, meminput, start_date, end_date, fcst_cycle, urlbaseinput, lead_time)
+valid_files = check_valid_urls(file_list)
