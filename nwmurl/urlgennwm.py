@@ -1,50 +1,52 @@
-#from gevent import monkey
-#monkey.patch_all()
+from gevent import monkey
+monkey.patch_all()
 from validation_util import check_valid_urls
 from dateutil import rrule
 from datetime import datetime, timezone
 from itertools import product
 import time
 import os
+import unittest
 
-#from concurrent.futures import ThreadPoolExecutor
-#import gevent
-#import requests
+
+from concurrent.futures import ThreadPoolExecutor
+import gevent
+import requests
 from functools import partial
 from tqdm import tqdm
 
-# def check_valid_urls(file_list, session=None):
-#     """if not session:
-#         session = requests.Session()"""
-#     t = tqdm(range(len(file_list)))
-#     check_url_part = partial(check_url, t)
-#     """with ThreadPoolExecutor(max_workers=10) as executor:
-#         valid_file_list = list(executor.map(check_url_part, file_list))"""
-#     valid_file_list = [gevent.spawn(check_url_part, file_name) for file_name in file_list]
-#     gevent.joinall(valid_file_list)
-#     return [file.get() for file in valid_file_list if file.get() is not None]
+def check_valid_urls(file_list, session=None):
+    """if not session:
+        session = requests.Session()"""
+    t = tqdm(range(len(file_list)))
+    check_url_part = partial(check_url, t)
+    """with ThreadPoolExecutor(max_workers=10) as executor:
+        valid_file_list = list(executor.map(check_url_part, file_list))"""
+    valid_file_list = [gevent.spawn(check_url_part, file_name) for file_name in file_list]
+    gevent.joinall(valid_file_list)
+    return [file.get() for file in valid_file_list if file.get() is not None]
 
 
-# def check_url(t, file):
-#     filename = file.split("/")[-1]
-#     try:
-#         with requests.head(file) as response:
-#             if response.status_code == 200:
-#                 t.set_description(f"Found: {filename}")
-#                 t.update(1)
-#                 t.refresh()
-#                 return file
-#             else:
-#                 t.set_description(f"Not Found: {filename}")
-#                 t.update(1)
-#                 t.refresh()
-#                 return None
-#         #response = session.head(file, timeout=1)
-#     except requests.exceptions.RequestException:
-#         t.set_description(f"Not Found: {filename}")
-#         t.update(1)
-#         t.refresh()
-#         return None
+def check_url(t, file):
+    filename = file.split("/")[-1]
+    try:
+        with requests.head(file) as response:
+            if response.status_code == 200:
+                t.set_description(f"Found: {filename}")
+                t.update(1)
+                t.refresh()
+                return file
+            else:
+                t.set_description(f"Not Found: {filename}")
+                t.update(1)
+                t.refresh()
+                return None
+        #response = session.head(file, timeout=1)
+    except requests.exceptions.RequestException:
+        t.set_description(f"Not Found: {filename}")
+        t.update(1)
+        t.refresh()
+        return None
 rundict = {
     1: "short_range",
     2: "medium_range",
@@ -508,3 +510,23 @@ generate_urls(start_date, end_date, fcst_cycle, lead_time, varinput, geoinput, r
 # Example usage
 file_list = create_file_list(runinput, varinput, geoinput, meminput, start_date, end_date, fcst_cycle, urlbaseinput, lead_time)
 valid_files = check_valid_urls(file_list)
+
+
+
+# class TestValidationScript(unittest.TestCase):
+#     def test_check_url(self):
+#         # Test a valid URL
+#         valid_url = "https://nomads.ncep.noaa.gov/pub/data/nccf/com/nwm/post-processed/WMS/"
+#         file_path = "filenamelist.txt"  # Provide a valid file path or filename
+#         result = check_url(file_path, valid_url)  # Provide both file path and URL
+#         self.assertEqual(result, valid_url)
+
+#         # Test an invalid URL
+#         invalid_url = ""
+#         result = check_url("", invalid_url)  # Provide an empty file path for an invalid URL
+#         self.assertIsNone(result)
+
+# if __name__ == '__main__':
+#     unittest.main()
+
+
