@@ -47,6 +47,8 @@ def check_url(t, file):
         t.update(1)
         t.refresh()
         return None
+
+
 rundict = {
     1: "short_range",
     2: "medium_range",
@@ -71,6 +73,7 @@ memdict = {
 }
 vardict = {1: "channel_rt", 2: "land", 3: "reservoir", 4: "terrain_rt", 5: "forcing"}
 geodict = {1: "conus", 2: "hawaii", 3: "puertorico"}
+
 
 def selectvar(vardict, varinput):
     return vardict[varinput]
@@ -191,13 +194,73 @@ urlbasedict = {
     9: "https://ciroh-nwm-zarr-copy.s3.amazonaws.com/national-water-model/",
 }
 
+retrospective_var_types = {
+    1: ".CHRTOUT_DOMAIN1.comp",
+    2: ".GWOUT_DOMAIN1.comp",
+    3: ".LAKEOUT_DOMAIN1.comp",
+    4: ".LDASOUT_DOMAIN1.comp",
+    5: ".RTOUT_DOMAIN1.comp",
+    6: ".LDASIN_DOMAIN1.comp",
+}
+
+objecttypes = {1: "forcing/", 2: "model_output/"}
+
+urlbasedict_retro = {
+    1: "https://noaa-nwm-retrospective-2-1-pds.s3.amazonaws.com/",
+    2: "s3://noaa-nwm-retrospective-2-1-pds/",
+    3: "https://ciroh-nwm-zarr-retrospective-data-copy.s3.amazonaws.com/noaa-nwm-retrospective-2-1-zarr-pds/",
+    4: "https://noaa-nwm-retrospective-3-0-pds.s3.amazonaws.com/CONUS/netcdf/",
+}
 
 
 def selecturlbase(urlbasedict, urlbaseinput, defaulturlbase=""):
-    if urlbaseinput:
+    if urlbaseinput in urlbasedict:
         return urlbasedict[urlbaseinput]
     else:
         return defaulturlbase
+
+
+def generate_urls_retro(
+    start_date=None,
+    end_date=None,
+    urlbaseinput=None,
+    objecttype=objecttypes,
+    selected_var_types=None,
+    write_to_file=False,
+):
+    urlbase_prefix = urlbasedict_retro[urlbaseinput]
+    objecttype = [objecttypes[i] for i in objecttype]
+    retrospective_var_types_selected = [
+        retrospective_var_types[i] for i in selected_var_types
+    ]
+
+    start_dt = datetime.strptime(start_date, "%Y%m%d%H%M")
+    end_dt = datetime.strptime(end_date, "%Y%m%d%H%M")
+
+    delta = end_dt - start_dt
+    date_range = [
+        start_dt + timedelta(hours=i)
+        for i in range(delta.days * 24 + delta.seconds // 3600 + 1)
+    ]
+
+    file_list = []
+    for date in date_range:
+        for obj_type in objecttype:
+            file_names = generate_url_retro(
+                date, obj_type, urlbase_prefix, retrospective_var_types_selected
+            )
+            if file_names is not None:
+                if isinstance(file_names, list):
+                    file_list.extend(file_names)
+                else:
+                    file_list.append(file_names)
+    if write_to_file == True:
+        if os.path.exists("retro_filenamelist.txt"):
+            os.remove("retro_filenamelist.txt")
+        with open("retro_filenamelist.txt", "wt") as file:
+            for item in file_list:
+                file.write(f"{item}\n")
+    return file_list
 
 
 def create_file_list(
@@ -423,23 +486,138 @@ def create_file_list(
 
     r = []
     for _dt, _fc, _fh in prod:
-        r.append(
-            makename(
-                _dt,
-                run_name,
-                var_name,
-                _fc,
-                _fh,
-                geography,
-                run_t,
-                fhp,
-                runsuff,
-                vsuff,
-                rtsuff,
-                urlbase_prefix,
+        if urlbaseinput == 9:
+            r.append(
+                makename(
+                    _dt,
+                    run_name,
+                    var_name,
+                    _fc,
+                    _fh,
+                    geography,
+                    run_t,
+                    fhp,
+                    runsuff,
+                    vsuff,
+                    rtsuff,
+                    urlbase_prefix,
+                ) + ".json"
             )
-        )
+        else:
+            r.append(
+                makename(
+                    _dt,
+                    run_name,
+                    var_name,
+                    _fc,
+                    _fh,
+                    geography,
+                    run_t,
+                    fhp,
+                    runsuff,
+                    vsuff,
+                    rtsuff,
+                    urlbase_prefix,
+                )
+            )
+    
+    
     return r
+
+
+def generate_url_retro(date, file_type, urlbase_prefix, retrospective_var_types=None):
+    year_txt = date.strftime("%Y")
+    date_txt = date.strftime("%Y%m%d%H")
+    
+    if "forcing" in file_type and date.year < 2007:
+        url = f"{urlbase_prefix}{file_type}{year_txt}/{date_txt}00.LDASIN_DOMAIN1"
+    elif "forcing" in file_type and date.year >= 2007:
+        url = f"{urlbase_prefix}{file_type}{year_txt}/{date_txt}.LDASIN_DOMAIN1"
+    elif "model_output" in file_type:
+        url = [
+            f"{urlbase_prefix}{file_type}{year_txt}/{date_txt}00{type}"
+            for type in retrospective_var_types
+        ]
+    
+    if urlbase_prefix == "https://ciroh-nwm-zarr-retrospective-data-copy.s3.amazonaws.com/noaa-nwm-retrospective-2-1-zarr-pds/":
+        for url in url: 
+            url = url + ".json"
+            url = url.replace('.comp', '')
+    return url
+
+
+def generate_urls_operational(
+    start_date,
+    end_date,
+    fcst_cycle,
+    lead_time,
+    varinput,
+    geoinput,
+    runinput,
+    urlbaseinput,
+    meminput,
+    write_to_file=False,
+):
+    start_date = start_date
+    end_date = end_date
+    fcst_cycle = fcst_cycle
+    # fcst_cycle = None # Retrieves a full day for each day within the range given.
+    # lead_time = [1]
+    lead_time = lead_time
+    varinput = varinput
+    # vardict = {1: "channel_rt", 2: "land", 3: "reservoir", 4: "terrain_rt", 5: "forcing"}
+    geoinput = geoinput
+    # geodict = {1: "conus", 2: "hawaii", 3: "puertorico"}
+    meminput = meminput
+    urlbaseinput = urlbaseinput
+    runinput = runinput
+
+    if (
+        runinput == 1
+        or runinput == 5
+        or runinput == 6
+        or runinput == 7
+        or runinput == 8
+        or runinput == 9
+        or runinput == 10
+        or runinput == 11
+    ):
+        meminput = None
+        print(
+            "no ensemble members available for the given runinput therefore, meminput set to None"
+        )
+    # rundict = {
+    # 1: "short_range",
+    # 2: "medium_range",
+    # 3: "medium_range_no_da",
+    # 4: "long_range",
+    # 5: "analysis_assim",
+    # 6: "analysis_assim_extend",
+    # 7: "analysis_assim_extend_no_da",
+    # 8: "analysis_assim_long",
+    # 9: "analysis_assim_long_no_da",
+    # 10: "analysis_assim_no_da",
+    # 11: "short_range_no_da",
+    # }
+
+    file_list = create_file_list(
+        runinput,
+        varinput,
+        geoinput,
+        meminput,
+        start_date,
+        end_date,
+        fcst_cycle,
+        urlbaseinput,
+        lead_time,
+    )
+    if write_to_file == True:
+        if os.path.exists("filenamelist.txt"):
+            os.remove("filenamelist.txt")
+        with open("filenamelist.txt", "wt") as file:
+            for item in file_list:
+                file.write(f"{item}\n")
+    return file_list
 def generate_urls(start_date,end_date, fcst_cycle, lead_time, varinput, geoinput, runinput, urlbaseinput, meminput):
 
     
@@ -506,7 +684,6 @@ runinput = 1
 urlbaseinput = 2
 meminput = 1
 generate_urls(start_date, end_date, fcst_cycle, lead_time, varinput, geoinput, runinput, urlbaseinput, meminput)
-
 # Example usage
 file_list = create_file_list(runinput, varinput, geoinput, meminput, start_date, end_date, fcst_cycle, urlbaseinput, lead_time)
 valid_files = check_valid_urls(file_list)
@@ -528,5 +705,4 @@ valid_files = check_valid_urls(file_list)
 
 # if __name__ == '__main__':
 #     unittest.main()
-
 
