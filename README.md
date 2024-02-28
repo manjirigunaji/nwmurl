@@ -1,7 +1,7 @@
 
 # nwmurl
 
-This library contains utility functions to generate National Water Model data URLs
+This library contains utility functions to susbet and generate National Water Model data URLs
 
 Developed by CIROH 2023
 ## Usage
