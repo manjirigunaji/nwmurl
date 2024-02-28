@@ -11,6 +11,7 @@ You can install `nwmurl` using pip:
 
 ```bash
 pip install nwmurl
+```
 
 ## Usage
 
