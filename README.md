@@ -1,9 +1,17 @@
 
 # nwmurl
 
-This library contains utility functions to susbet and generate National Water Model data URLs
+nwmurl is a Python library developed by CIROH 2023. It provides utility functions specifically designed to subset and generate National Water Model (NWM) data URLs. This library simplifies the process of accessing NWM data for various purposes such as analysis, modeling, and visualization.
 
 Developed by CIROH 2023
+
+## Installation
+
+You can install `nwmurl` using pip:
+
+```bash
+pip install nwmurl
+
 ## Usage
 
 1. In the code, you can modify the input parameters, such as `start_date`, `end_date`, `fcst_cycle`, `lead_time`, `varinput`, `geoinput`, and `runinput`, to customize the NWM data retrieval.
