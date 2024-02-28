@@ -130,7 +130,7 @@ We welcome contributions to nwmurl! To contribute to the development of this lib
 
 2. Clone your fork to your local machine:` 
 
-	`git clone https://github.com/your-username/nwmurl.git`
+	`git clone https://github.com/CIROH-UA/nwmurl.git`
 
  3. Create a new branch for your contribution:` 
 
