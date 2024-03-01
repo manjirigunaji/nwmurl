@@ -30,7 +30,7 @@ pip install nwmurl
    - `3` or `\"reservoir\"` for reservoir data.
    - `4` or `\"terrain_rt\"` for terrain routing data.
    - `5` or `\"forcing\"` for forcing data.
-   - `geoinput`: An integer or string specifying the geographic region of interest. Options include:
+- `geoinput`: An integer or string specifying the geographic region of interest. Options include:
    - `1` or `\"conus\"` for the continental United States.
    - `2` or `\"hawaii\"` for Hawaii.
    - `3` or `\"puertorico\"` for Puerto Rico.
@@ -47,7 +47,7 @@ pip install nwmurl
    - `10` or `\"analysis_assim_no_da\"` for analysis-assimilation runs without data assimilation.
    - `11` or `\"short_range_no_da\"` for short-range forecasts without data assimilation.
 - `urlbaseinput `:  An integer representing the NWM dataset. Available options include:
-	- `1`: "https://nomads.ncep.noaa.gov/pub/data/nccf/com/nwm/prod/".
+    - `1`: "https://nomads.ncep.noaa.gov/pub/data/nccf/com/nwm/prod/".
     - `2`: "https://nomads.ncep.noaa.gov/pub/data/nccf/com/nwm/post-processed/WMS/".
     - `3`: "https://storage.googleapis.com/national-water-model/".
     - `4`: "https://storage.cloud.google.com/national-water-model/".
@@ -63,16 +63,16 @@ pip install nwmurl
 - `start_date`: A string representing the starting date in the format \"YYYYMMDDHHMM".
 - `end_date`: A string representing the ending date in the same format.
 - `urlbaseinput `:  An integer representing the NWM dataset. Available options include:
-	- `1`: "https://noaa-nwm-retrospective-2-1-pds.s3.amazonaws.com/".
+    - `1`: "https://noaa-nwm-retrospective-2-1-pds.s3.amazonaws.com/".
     - `2`: "s3://noaa-nwm-retrospective-2-1-pds/model_output/".
     - `3`: "https://ciroh-nwm-zarr-retrospective-data-copy.s3.amazonaws.com/noaa-nwm-retrospective-2-1-zarr-pds/".
     - `4`: "https://noaa-nwm-retrospective-3-0-pds.s3.amazonaws.com/CONUS/netcdf/".
-- `selectet_object_type`: An integer representing the object type. Available options include:
+- `selected_object_type`: A list of integers representing the object type. Available options include:
 	- `1` for forcing data
 	- `2` for model_output
  
-- `Selectet_var_types`:  An integer or string representing the variable of interest within the NWM data. Available options include:
-	- `1`: ".CHRTOUT_DOMAIN1.comp"
+- `selected_var_types`:  A list of integers or strings representing the variable of interest within the NWM data. Available options include:
+    - `1`: ".CHRTOUT_DOMAIN1.comp"
     - `2`: ".GWOUT_DOMAIN1.comp"
     - `3`: ".LAKEOUT_DOMAIN1.comp"
     - `4`: ".LDASOUT_DOMAIN1.comp"
@@ -99,7 +99,9 @@ meminput = 1
 write_to_file = False
 
 file_list = nwmurl.generate_urls_operational(
-    start_date, end_date, fcst_cycle,
+    start_date,
+    end_date,
+    fcst_cycle,
     lead_time,
     varinput,
     geoinput,
